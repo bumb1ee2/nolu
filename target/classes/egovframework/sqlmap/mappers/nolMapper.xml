@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="nol">
+		
+		<!-- member -->
+		<insert id = "memberJoin" parameterType="geocni.vo.NolVo">
+			insert into member values(#{m_id}, #{m_pass}, #{m_name}, #{m_tel}, #{m_birth}, #{m_email})
+		</insert>		
+		
+		<select id = "loginCheck" parameterType="geocni.vo.NolVo" resultType="String">
+			select m_name from member where m_id=#{m_id} and m_pass=#{m_pass}
+		</select>
+		
+		<select id = "idCheck" parameterType="String" resultType="Integer">
+			select count(*) from member where m_id=#{m_id}
+		</select>
+		
+		<select id = "viewMember" resultType="geocni.vo.NolVo">
+			select * from member where m_id=#{m_id} and m_pass=#{m_pass}
+		</select>
+		
+		<select id = "memInfo" resultType="geocni.vo.NolVo">
+			select * from member where m_id=#{m_id}
+		</select>
+		
+		<update id = "memMod" parameterType="geocni.vo.NolVo">
+			update member set m_pass=#{m_pass}, m_name=#{m_name}, m_tel=#{m_tel}, m_birth=#{m_birth}, m_email=#{m_email} where m_id=#{m_id}
+		</update>
+		
+		<delete id = "memDel" parameterType="geocni.vo.NolVo">
+			delete from member where m_id=#{m_id}
+		</delete>
+		
+		<select id = "memList" parameterType="geocni.vo.NolVo" resultType="geocni.vo.NolVo">
+			select * from member where m_id != 'admin'
+		</select>
+		
+		
+		<!-- room -->
+		<select id = "roomPreview" resultType="geocni.vo.NolRoomVo">
+			select * from room order by r_num asc;
+		</select>
+		
+		<select id = "roomView" parameterType="int" resultType="geocni.vo.NolRoomVo">
+			select * from room where r_num=#{r_num}
+		</select>
+		
+		<update id = "roomState" parameterType="geocni.vo.NolRoomVo">
+			update room set r_state=#{r_state} where r_num=#{r_num}
+		</update>
+		
+		<update id = "roomMod" parameterType="geocni.vo.NolRoomVo">
+			update room	set r_base_person=#{r_base_person}, r_max_person=#{r_max_person}, r_base_price=#{r_base_price}, r_amenty=#{r_amenty}, r_img1=#{r_img1}, r_type=#{r_type} where r_num=#{r_num}						
+
+		</update>
+		
+		<update id = "roomImgMod" parameterType="geocni.vo.NolRoomVo">
+			update room set r_img2=#{r_img2} where r_num=#{r_num}
+		</update>
+		
+		
+		<!-- reservation -->
+		<select id = "resList" parameterType="geocni.vo.NolResVo" resultType="geocni.vo.NolResVo">
+			select res_num, m_id, res_date, res_checkIn, res_checkIn+res_day-1 as res_checkOut, res_day, r_num, res_state from reservation order by res_num desc
+		</select>
+		
+		<select id = "resInfo" parameterType="String" resultType="geocni.vo.NolResVo" >
+			select reservation.*, res_checkIn+res_day-1 as res_checkOut, room.r_base_price*reservation.res_day as price 
+			from reservation inner join room 
+			on reservation.r_num = room.r_num 
+			where m_id = #{m_id}
+			order by res_date desc;
+		</select>
+		
+		<insert id = "reserv" parameterType="geocni.vo.NolResVo">
+			insert into reservation (m_id, res_date, res_checkIn, res_day, r_num, res_state) values (#{m_id}, now(), #{res_checkIn}, #{res_day}, #{r_num}, '결제대기')
+		</insert>
+		
+		<update id = "resMod" parameterType="geocni.vo.NolResVo">
+			update reservation set res_state=#{res_state} where res_num=#{res_num}
+		</update>
+		
+		<delete id = "resDel" parameterType="geocni.vo.NolResVo">
+			delete from reservation where res_num=#{res_num} 
+		</delete>
+		
+		
+		<!-- notice -->
+		<select id = "noList" resultType="geocni.vo.NolNoticeVo">
+			select * from notice order by n_num desc
+		</select>
+		
+		<select id = "upList" resultType="geocni.vo.NolNoticeVo">
+			select * from notice where n_fix = 'Y' order by n_num desc
+		</select>
+		
+		<select id = "listCount" resultType="int">
+			select count(n_num) from notice
+		</select>
+		
+		<select id = "noDetail" parameterType = "int" resultType="geocni.vo.NolNoticeVo">
+			select * from notice where n_num = #{n_num}
+		</select>
+		
+		<update id = "readCount" parameterType="int">
+			update notice set n_readcount = n_readcount+1 where n_num=#{n_num}
+		</update>
+		
+		<select id = "selectBefore" parameterType="int" resultType="geocni.vo.NolNoticeVo">
+			select * from notice where n_num in(select max(n_re_ref) from notice where n_num <![CDATA[<]]> #{n_num})
+		</select>
+		
+		<select id = "selectNext" parameterType="int" resultType="geocni.vo.NolNoticeVo">
+			select * from notice where n_num in(select n_num from notice where n_num <![CDATA[>]]> #{n_num}) limit 1
+		</select>
+		
+		<insert id = "noWrite" parameterType="geocni.vo.NolNoticeVo">
+			insert into notice(m_id, n_pass, n_subject, n_content, n_file, n_re_lev, n_re_seq, n_readcount, n_date, n_fix) 
+			values(#{m_id}, #{n_pass}, #{n_subject}, #{n_content}, #{n_file}, 0, 0, 0, now(), #{n_fix})	
+		</insert>
+		
+		<update id = "noMod" parameterType="geocni.vo.NolNoticeVo">
+			update notice set n_subject=#{n_subject}, n_content=#{n_content}, n_file=#{n_file}, n_fix=#{n_fix}  where n_num=#{n_num}
+		</update>
+		
+		<delete id = "noDel" parameterType="int">
+			delete from notice where n_num = #{n_num}
+		</delete>
+	</mapper>

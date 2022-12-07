@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+	<mapper namespace="geocni.service.TestMapper">
+		<!-- 게시글 조회 -->
+		<select id = "selectTest" parameterType="TestVo" resultType="TestVo">
+			select * from board order by bno desc
+		</select>
+		
+		<!-- 게시글 상세 -->
+		<select id = "selectDetail" parameterType="TestVo" resultType="TestVo">
+			select * from board where bno=#{bno}
+		</select>
+		
+		<!-- 게시글 작성 -->
+		<insert id = "insertTest" parameterType="TestVo">
+			insert into board (title, content, writer, regdate) values(#{title}, #{content}, #{writer}, now())
+		</insert>
+		
+		<!-- 게시글 수정 -->
+		<update id = "updateTest" parameterType="TestVo">
+			update board set title=#{title}, content=#{content}, writer=#{writer}, regdate=now() where bno=#{bno}
+		</update>
+		
+		<!-- 게시글 삭제 -->
+		<delete id = "deleteTest" parameterType="TestVo">
+			delete from board where bno=#{bno}
+		</delete>
+		
+		<!-- 조회수 -->
+		<update id = "boardHit" parameterType="int">
+			update board set hit = hit+1 where bno=#{bno}
+		</update>
+		
+		
+	</mapper>
